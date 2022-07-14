@@ -1,0 +1,129 @@
+```{r}
+library(tidyverse)
+library(magick)
+```
+
+```{r}
+imager::load.image("sample.jpg") %>% 
+  imager::grayscale(.) %>% 
+  `<`(0.9) %>% 
+  plot
+```
+
+
+<!-- ```{r} -->
+
+<!-- ``` -->
+
+<!-- ```{r} -->
+<!-- magick::image_ocr_data(img_tb) -->
+<!-- ``` -->
+
+<!-- ```{r} -->
+<!-- img_tb %>%  -->
+<!--   image_convert(type = "Grayscale") %>% -->
+<!--   image_fill() -->
+<!--   image_trim(fuzz = 40) %>%  -->
+<!--   image_write(format = 'png', density = '300x300') %>%  -->
+<!--   tesseract::ocr() %>% cat -->
+<!-- ``` -->
+
+<!-- ```{r} -->
+<!-- img_tb %>%  -->
+<!--   image_transparent("white", fuzz = 70) %>%  -->
+<!--   image_background("white")  -->
+<!-- %>%  -->
+<!--   image_convert(type = "Grayscale") %>% -->
+<!--   image_write(format = 'png', density = '300x300') %>%  -->
+<!--   tesseract::ocr() %>%  -->
+<!--   cat -->
+<!-- ``` -->
+
+<!-- ```{r} -->
+<!-- img_tb %>%  -->
+<!--   image_transparent("white", fuzz = 83) %>%  -->
+<!--   image_background("white") %>%  -->
+<!--   image_convert(type='Grayscale') %>%  -->
+<!--   image_transparent("white", fuzz = 50) %>%  -->
+<!--   image_background("white") %>%  -->
+<!--   image_write(format = 'png', density = '300x300', path = "haha.png") -->
+<!-- ``` -->
+
+<!-- ```{r} -->
+<!-- img_tb2 <- image_read("haha.png") -->
+<!-- ``` -->
+
+<!-- ```{r} -->
+
+<!-- ``` -->
+
+
+<!-- ```{r} -->
+<!-- img_tb2 %>%  -->
+<!--   image_transparent("white", fuzz = 80) %>%  -->
+<!--   image_background("white") %>%  -->
+<!--   image_crop("30x1595+405+205") %>% -->
+<!--   image_negate() %>%  -->
+<!--   image_morphology(method = "Thinning", kernel = "Rectangle:8x1") %>%  -->
+<!--   image_negate() %>%  -->
+<!--   tesseract::ocr(., engine = numbers) %>% cat -->
+<!-- ``` -->
+
+```{r}
+img_tb <- magick::image_read("sample.jpg")
+numbers <- tesseract::tesseract(options = list(tessedit_char_whitelist = "0123456789"))
+img_tb %>% 
+  image_crop('340x1600+710+200') %>% 
+  image_draw() -> new_img
+
+  rect(xleft = 0, ytop = 0, xright = 25, ybottom = 1600, border = "white", lwd = 2, col = "white")
+  rect(xleft = 100, ytop = 0, xright = 150, ybottom = 1600, border = "white", lwd = 2, col = "white")
+  rect(xleft = 230, ytop = 0, xright = 260, ybottom = 1600, border = "white", lwd = 2, col = "white")
+  
+  rect(xleft = 0, ytop = 0, xright = 340, ybottom = 3, border = "white", lwd = 2, col = "white")
+  rect(xleft = 0, ytop = 30, xright = 340, ybottom = 35, border = "white", lwd = 2, col = "white")
+  rect(xleft = 0, ytop = 67, xright = 340, ybottom = 72, border = "white", lwd = 2, col = "white")
+  
+  for (k in 1:42) {
+    rect(xleft = 0, ytop = 67 + k*35.58, xright = 340, ybottom = 72+ k*35.58, border = "white", lwd = 2, col = "white")
+  }
+  
+  # print(new_img)
+  new_img %>%
+    image_transparent("white", fuzz = 60)%>%
+    image_background("white") %>%
+    image_negate() %>%
+    image_morphology(method = "Thinning", kernel = "Rectangle:20x1") %>%
+    image_negate() %>% 
+    tesseract::ocr(., engine = numbers) %>% 
+    str_split("\n") %>% 
+    unlist %>% 
+    str_split("\\s+") %>% 
+    map(~{
+      .x %>% 
+        {
+          xx <- .
+          if (any(str_detect(xx, "^$", negate = TRUE))) {
+            if (length(xx) < 3) {
+              yy <- xx
+              dd <- length(yy)
+              while (dd < 3) {
+                yy <- c(yy, 0)
+                dd <- length(yy)
+              }
+              yy
+            } else {
+              xx
+            }
+          } else {
+            NULL
+          }
+        }
+    }) %>% 
+    do.call(rbind,.)
+```
+
+```{r}
+
+```
+
